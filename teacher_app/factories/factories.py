@@ -3,6 +3,9 @@ import factory
 from authentication.models import Teacher
 
 
+PASSWORD = 'testing123'
+
+
 class TeacherFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Teacher
@@ -13,4 +16,7 @@ class TeacherFactory(factory.django.DjangoModelFactory):
         lambda obj: '{0}_{1}@test.com'.
         format(obj.first_name.lower(), obj.last_name.lower())
     )
-    password = 'testing123'
+    password = factory.PostGenerationMethodCall(
+        'set_password',
+        PASSWORD
+    )
