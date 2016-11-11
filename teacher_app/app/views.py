@@ -1,7 +1,8 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView
 
 from authentication.models import Teacher
 from forms import ClassForm, StudentForm
@@ -33,11 +34,40 @@ class ClassCreateView(LoginRequiredMixin, CreateView):
         self.object.teacher = teacher
         return super(ClassCreateView, self).form_valid(form)
 
+    def form_invalid(self, form):
+        '''Add error messages to the messages framework'''
+        for key in form.errors:
+            for error in form.errors[key]:
+                messages.add_message(self.request, messages.ERROR, error)
+        return super(ClassCreateView, self).form_invalid(form)
+
     def get_context_data(self, **kwargs):
         context = super(
             ClassCreateView, self).get_context_data(**kwargs)
         context['title'] = 'create new class'
         context['url_name'] = 'create-class'
+        return context
+
+
+class ClassUpdateView(LoginRequiredMixin, UpdateView):
+    model = Class
+    context_object_name = 'class'
+    template_name = 'app/edit-class.html'
+    form_class = ClassForm
+    success_url = reverse_lazy('index')
+
+    def form_invalid(self, form):
+        '''Add error messages to the messages framework'''
+        for key in form.errors:
+            for error in form.errors[key]:
+                messages.add_message(self.request, messages.ERROR, error)
+        return super(ClassUpdateView, self).form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            ClassUpdateView, self).get_context_data(**kwargs)
+        context['url_name'] = 'edit-class'
+        context['title'] = 'edit class'
         return context
 
 

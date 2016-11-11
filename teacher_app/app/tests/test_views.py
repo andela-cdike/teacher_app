@@ -48,9 +48,9 @@ class ClassViewsTestSuite(Base):
         data = {'name': 'class A'}
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
-        class_a = Class.objects.filter(name=data['name'])
-        self.assertTrue(class_a.exists())
-        self.assertIsInstance(class_a[0].teacher, Teacher)
+        new_class = Class.objects.filter(name=data['name'])
+        self.assertTrue(new_class.exists())
+        self.assertIsInstance(new_class[0].teacher, Teacher)
 
     def test_view_students_in_class(self):
         self.student_a = factories.StudentFactory(my_class=self.class_a)
@@ -74,3 +74,20 @@ class ClassViewsTestSuite(Base):
         student = Student.objects.filter(first_name=data['first_name'])
         self.assertTrue(student.exists())
         self.assertEqual(student[0].my_class, self.class_a)
+
+    def test_edit_class_name(self):
+        url = reverse('edit-class', kwargs={'pk': self.class_a.pk})
+        data = {'name': 'edit class'}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+
+        edited_class = Class.objects.filter(name=data['name'])
+        self.assertTrue(edited_class.exists())
+
+    def test_edit_class_name_to_a_used_name(self):
+        class_b = factories.ClassFactory(teacher=self.teacher)
+        url = reverse('edit-class', kwargs={'pk': self.class_a.pk})
+        data = {'name': class_b.name}
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn('Error', response.content)
