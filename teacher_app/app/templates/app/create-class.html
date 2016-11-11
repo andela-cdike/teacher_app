@@ -14,7 +14,7 @@
             <!-- Display messages -->
             <section>
               <ul class="list-group">
-                <li class="list-group-item list-group-item-danger"><strong>Error{{ messages|length|pluralize }}!</strong></li>
+                <li class="list-group-item list-group-item-info"><strong>Error{{ messages|length|pluralize }}!</strong></li>
                 {% for message in messages %}
                   {% autoescape off %}
                     <li class="list-group-item list-group-item-{{ message.tags }}">

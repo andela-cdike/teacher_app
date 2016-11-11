@@ -1,6 +1,7 @@
 from __future__ import unicode_literals
 
 from django.db import models
+from django.urls import reverse
 
 
 class Base(models.Model):
@@ -21,6 +22,9 @@ class Class(Base):
 
     def __unicode__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('class-detail', kwargs={'pk': self.id})
 
 
 class Student(Base):

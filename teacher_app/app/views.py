@@ -1,10 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.urls import reverse_lazy
+from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView
 
 from authentication.models import Teacher
-from forms import ClassCreateForm
+from forms import ClassForm, StudentForm
 from models import Class, Student
 
 
@@ -24,7 +24,7 @@ class ClassCreateView(LoginRequiredMixin, CreateView):
     model = Class
     template_name = 'app/create-class.html'
     success_url = reverse_lazy('index')
-    form_class = ClassCreateForm
+    form_class = ClassForm
 
     def form_valid(self, form):
         '''Make current user the teacher of this class'''
@@ -34,7 +34,6 @@ class ClassCreateView(LoginRequiredMixin, CreateView):
         return super(ClassCreateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
-        '''Add title to context'''
         context = super(
             ClassCreateView, self).get_context_data(**kwargs)
         context['title'] = 'create new class'
@@ -52,3 +51,36 @@ class ClassDetailView(LoginRequiredMixin, ListView):
         queryset = super(ClassDetailView, self).get_queryset()
         queryset = queryset.filter(my_class=self.kwargs['pk'])
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            ClassDetailView, self).get_context_data(**kwargs)
+        my_class = Class.objects.get(pk=self.kwargs['pk'])
+        context['class'] = my_class
+        return context
+
+
+class StudentCreateView(LoginRequiredMixin, CreateView):
+    model = Student
+    template_name = 'app/create-student.html'
+    form_class = StudentForm
+
+    def form_valid(self, form):
+        '''
+        Add relationship between this student and the class
+        whose id is in the url
+        '''
+        self.object = form.save(commit=False)
+        students_class = Class.objects.get(pk=self.kwargs['pk'])
+        self.object.my_class = students_class
+        return super(StudentCreateView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            StudentCreateView, self).get_context_data(**kwargs)
+        context['class_id'] = self.kwargs['pk']
+        context['title'] = 'Add Student'
+        return context
+
+    def get_success_url(self):
+        return reverse('class-detail', kwargs={'pk': self.kwargs['pk']})

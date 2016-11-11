@@ -10,4 +10,9 @@ urlpatterns = [
     url(r'^class/(?P<pk>[0-9]+)$',
         views.ClassDetailView.as_view(),
         name='class-detail'),
+
+    # Student Views
+    url(r'^class/(?P<pk>[0-9]+)/create-student/$',
+        views.StudentCreateView.as_view(),
+        name='create-student'),
 ]
