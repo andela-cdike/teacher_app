@@ -37,10 +37,10 @@ class IndexViewTestSuite(Base):
         self.assertEqual(response.status_code, 302)
 
 
-class ClassViewTestSuite(Base):
+class ClassViewsTestSuite(Base):
 
     def setUp(self, *args, **kwargs):
-        super(ClassViewTestSuite, self).setUp(*args, **kwargs)
+        super(ClassViewsTestSuite, self).setUp(*args, **kwargs)
 
     def test_create_class(self):
         url = reverse('create-class')
@@ -50,3 +50,14 @@ class ClassViewTestSuite(Base):
         class_a = Class.objects.filter(name=data['name'])
         self.assertTrue(class_a.exists())
         self.assertIsInstance(class_a[0].teacher, Teacher)
+
+    def test_view_students_in_class(self):
+        self.class_a = factories.ClassFactory(teacher=self.teacher)
+        self.student_a = factories.StudentFactory(my_class=self.class_a)
+        self.student_b = factories.StudentFactory(my_class=self.class_a)
+
+        url = reverse('class-detail', kwargs={'pk': self.class_a.pk})
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(str(self.student_a), response.content)
+        self.assertIn(str(self.student_b), response.content)

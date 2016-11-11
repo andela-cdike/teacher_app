@@ -6,27 +6,24 @@
 
 <main class="col-sm-offset-3 col-sm-6">
   <section>
-    <h4 class="text-center">My Classes</h4>
+    <h4 class="text-center">My Students</h4>
     <br />
     <table class="table table-striped">
       <thead>
         <tr>
           <th>S/N</th>
-          <th>Class Name</th>
+          <th>Full Name</th>
         </tr>
       </thead>
       <tbody>
-        {% for class in classes %}
+        {% for student in students %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td><a href="{% url 'class-detail' pk=class.pk %}">{{ class.name }}</a></td>
+            <td>{{ student }}</td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
-    <div class="col-sm-offset-4 col-sm-3">
-      <a href="{% url 'create-class' %}" class="btn btn-info text-center">Add New Class</a>      
-    </div>
   </section>
 </main>
 

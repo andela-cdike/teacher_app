@@ -8,3 +8,17 @@ class ClassModelTestSuite(TestCase):
     def test_class_model(self):
         test_class = factories.ClassFactory()
         self.assertEqual(str(test_class), test_class.name)
+
+
+class StudentModelTestSuite(TestCase):
+
+    def test_student_model(self):
+        student = factories.StudentFactory()
+        self.assertEqual(
+            str(student),
+            '{0} {1} {2}'.format(
+                student.first_name,
+                student.middle_name,
+                student.last_name
+            )
+        )

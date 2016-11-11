@@ -5,7 +5,7 @@ from django.views.generic.edit import CreateView
 
 from authentication.models import Teacher
 from forms import ClassCreateForm
-from models import Class
+from models import Class, Student
 
 
 class IndexView(LoginRequiredMixin, ListView):
@@ -40,3 +40,15 @@ class ClassCreateView(LoginRequiredMixin, CreateView):
         context['title'] = 'create new class'
         context['url_name'] = 'create-class'
         return context
+
+
+class ClassDetailView(LoginRequiredMixin, ListView):
+    model = Student
+    template_name = 'app/class-detail.html'
+    context_object_name = 'students'
+
+    def get_queryset(self):
+        '''Return only students that belong to the calling class'''
+        queryset = super(ClassDetailView, self).get_queryset()
+        queryset = queryset.filter(my_class=self.kwargs['pk'])
+        return queryset
