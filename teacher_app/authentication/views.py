@@ -48,7 +48,7 @@ class RegisterView(SuccessMessageMixin, CreateView):
 class LoginView(FormView):
     '''Handles User Login'''
     form_class = AuthenticationForm
-    success_url = reverse_lazy('register')
+    success_url = reverse_lazy('index')
     template_name = 'authentication/authentication.html'
 
     def form_valid(self, form):

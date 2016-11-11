@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block main %}
+
+<main class="col-sm-offset-3 col-sm-6">
+  <section>
+    <h4>My Classes</h4>
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Class Name</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for class in classes %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ class.name }}</td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</main>
+
+{% endblock main %}

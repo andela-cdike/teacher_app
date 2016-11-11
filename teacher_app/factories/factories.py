@@ -1,5 +1,6 @@
 import factory
 
+from app.models import Class
 from authentication.models import Teacher
 
 
@@ -20,3 +21,11 @@ class TeacherFactory(factory.django.DjangoModelFactory):
         'set_password',
         PASSWORD
     )
+
+
+class ClassFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Class
+
+    name = factory.Sequence(lambda n: 'class_{0}'.format(n))
+    teacher = factory.SubFactory(TeacherFactory)
