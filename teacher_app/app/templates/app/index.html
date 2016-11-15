@@ -19,7 +19,7 @@
         {% for class in classes %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <a href="{% url 'class-detail' pk=class.pk %}"><td>{{ class.name }}</td></a>
+            <td><a href="{% url 'class-detail' pk=class.pk %}">{{ class.name }}</a></td>
             <td>
               <a href="{% url 'edit-class' pk=class.pk %}">Edit</a>
             </td>

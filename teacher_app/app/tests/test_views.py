@@ -91,3 +91,31 @@ class ClassViewsTestSuite(Base):
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 200)
         self.assertIn('Error', response.content)
+
+
+class StudentViewTestSuite(Base):
+
+    def setUp(self):
+        super(StudentViewTestSuite, self).setUp()
+        class_a = factories.ClassFactory(teacher=self.teacher)
+        self.student = factories.StudentFactory(my_class=class_a)
+
+    def test_edit_student(self):
+        url = reverse(
+            'edit-student',
+            kwargs={
+                'class_id': self.student.my_class.id,
+                'pk': self.student.id
+            }
+        )
+        data = {
+            'first_name': 'John',
+            'middle_name': 'Junior',
+            'last_name': 'Doe'
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+        edited_student = Student.objects.get(pk=self.student.pk)
+        self.assertEqual(edited_student.first_name, data['first_name'])
+        self.assertEqual(edited_student.last_name, data['last_name'])
+        self.assertEqual(edited_student.middle_name, data['middle_name'])

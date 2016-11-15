@@ -114,3 +114,27 @@ class StudentCreateView(LoginRequiredMixin, CreateView):
 
     def get_success_url(self):
         return reverse('class-detail', kwargs={'pk': self.kwargs['pk']})
+
+
+class StudentUpdateView(LoginRequiredMixin, UpdateView):
+    model = Student
+    context_object_name = 'student'
+    template_name = 'app/edit-student.html'
+    form_class = StudentForm
+
+    def form_invalid(self, form):
+        '''Add error messages to the messages framework'''
+        for key in form.errors:
+            for error in form.errors[key]:
+                messages.add_message(self.request, messages.ERROR, error)
+        return super(StudentUpdateView, self).form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            StudentUpdateView, self).get_context_data(**kwargs)
+        context['url_name'] = 'edit-student'
+        context['title'] = 'edit student'
+        return context
+
+    def get_success_url(self):
+        return reverse('class-detail', kwargs={'pk': self.kwargs['class_id']})

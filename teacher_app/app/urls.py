@@ -18,4 +18,7 @@ urlpatterns = [
     url(r'^class/(?P<pk>[0-9]+)/create-student/$',
         views.StudentCreateView.as_view(),
         name='create-student'),
+    url(r'^class/(?P<class_id>[0-9]+)/student/(?P<pk>[0-9]+)/edit/$',
+        views.StudentUpdateView.as_view(),
+        name='edit-student'),
 ]
