@@ -5,6 +5,17 @@
 {% block main %}
 
 <main class="col-sm-offset-3 col-sm-6">
+
+  <!-- search bar -->
+  <section id="search-bar">
+    <form action="{% url 'class-detail' pk=class.pk %}" method="get" class="form-inline">
+      <div class="form-group">
+        <input class="form-control" id="search-box" type="text" name="q" placeholder="Filter students by subjects" />
+      </div>
+      <button type="submit" class="btn btn-default">Search</button>
+    </form>
+  </section>
+
   <section>
     <h4 class="text-center">My Students</h4>
     <br />
@@ -13,6 +24,19 @@
         <tr>
           <th>S/N</th>
           <th>Full Name</th>
+          <th>
+            <form action="{% url 'class-detail' pk=class.pk %}" method="get">
+              <label for="filter">Filter by subjects {{ selected_filter }}:</label>
+              <select class="form-control" id="filter" onchange="this.form.submit()" name="filter">
+                <option {% if selected_filter == 0 %}selected{% endif %} value="0">All</option>
+                {% for subject in subjects %}
+                  <option {% if selected_filter == subject.id %}selected{% endif %} value="{{ subject.id }}">
+                    {{ subject.title }}
+                  </option>
+                {% endfor %}
+              </select>
+            </form>
+          </th>
         </tr>
       </thead>
       <tbody>

@@ -78,15 +78,29 @@ class ClassDetailView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         '''Return only students that belong to the calling class'''
-        queryset = super(ClassDetailView, self).get_queryset()
-        queryset = queryset.filter(my_class=self.kwargs['pk'])
+        filter_id = int(self.request.GET.get('filter', 0))
+
+        # if filtering based on students offering particular subject
+        if filter_id:
+            subject = Subject.objects.get(pk=filter_id)
+            queryset = subject.students.all()
+        else:
+            queryset = super(ClassDetailView, self).get_queryset()
+            queryset = queryset.filter(my_class=self.kwargs['pk'])
+            q = self.request.GET.get('q', None)
+            if q:
+                import ipdb; ipdb.set_trace()
+                queryset = queryset.subject_set.filter(title__icontains=q)
         return queryset
 
     def get_context_data(self, **kwargs):
         context = super(
             ClassDetailView, self).get_context_data(**kwargs)
         my_class = Class.objects.get(pk=self.kwargs['pk'])
+        subjects = Subject.objects.all()
         context['class'] = my_class
+        context['subjects'] = subjects
+        context['selected_filter'] = int(self.request.GET.get('filter', 0))
         return context
 
 

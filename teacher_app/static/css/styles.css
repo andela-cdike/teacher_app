@@ -1,3 +1,7 @@
 .panel {
     margin-top: 25%;
 }
+
+#search-box {
+    width: 500px;
+}

@@ -1,3 +1,4 @@
+from django.http import QueryDict
 from django.test import Client, TestCase
 from django.urls import reverse
 
@@ -97,10 +98,10 @@ class StudentViewTestSuite(Base):
 
     def setUp(self):
         super(StudentViewTestSuite, self).setUp()
-        class_a = factories.ClassFactory(teacher=self.teacher)
-        self.student = factories.StudentFactory(my_class=class_a)
-        self.physics = factories.SubjectFactory(students=(self.student,))
-        self.chemistry = factories.SubjectFactory(students=(self.student,))
+        self.class_a = factories.ClassFactory(teacher=self.teacher)
+        self.student = factories.StudentFactory(my_class=self.class_a)
+        self.subject_a = factories.SubjectFactory(students=(self.student,))
+        self.subject_b = factories.SubjectFactory(students=(self.student,))
 
     def test_view_students_subjects(self):
             url = reverse(
@@ -112,8 +113,8 @@ class StudentViewTestSuite(Base):
             )
             response = self.client.get(url)
             self.assertEqual(response.status_code, 200)
-            self.assertIn(self.physics.title, response.content)
-            self.assertIn(self.chemistry.title, response.content)
+            self.assertIn(self.subject_a.title, response.content)
+            self.assertIn(self.subject_b.title, response.content)
 
     def test_edit_student(self):
         url = reverse(
@@ -147,13 +148,28 @@ class StudentViewTestSuite(Base):
             'first_name': 'John',
             'middle_name': 'Junior',
             'last_name': 'Doe',
-            'subjects': [self.physics.pk, self.chemistry.pk]
+            'subjects': [self.subject_a.pk, self.subject_b.pk]
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
 
         student = Student.objects.get(pk=self.student.pk)
-        physics = student.subject_set.filter(title=self.physics.title)
-        self.assertTrue(physics.exists())
-        chemistry = student.subject_set.filter(title=self.chemistry.title)
-        self.assertTrue(chemistry.exists())
+        subject_a = student.subject_set.filter(title=self.subject_a.title)
+        self.assertTrue(subject_a.exists())
+        subject_b = student.subject_set.filter(title=self.subject_b.title)
+        self.assertTrue(subject_b.exists())
+
+    def test_filter_by_subject(self):
+        student_b = factories.StudentFactory(my_class=self.class_a)
+        query_dict = QueryDict('', mutable=True)
+        query_dict.update({'filter': self.subject_a.id})
+        url = '{base_url}?{query_string}'.format(
+            base_url=reverse(
+                'class-detail',
+                kwargs={'pk': self.student.my_class.pk}),
+            query_string=query_dict.urlencode()
+        )
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, 200)
+        self.assertIn(str(self.student), response.content)
+        self.assertNotIn(str(student_b), response.content)
