@@ -100,6 +100,22 @@ class StudentViewTestSuite(Base):
         class_a = factories.ClassFactory(teacher=self.teacher)
         self.student = factories.StudentFactory(my_class=class_a)
 
+    def test_view_students_subjects(self):
+            self.physics = factories.SubjectFactory(students=(self.student,))
+            self.chemistry = factories.SubjectFactory(students=(self.student,))
+
+            url = reverse(
+                'student-detail',
+                kwargs={
+                    'class_id': self.student.my_class.pk,
+                    'pk': self.student.pk
+                }
+            )
+            response = self.client.get(url)
+            self.assertEqual(response.status_code, 200)
+            self.assertIn(self.physics.title, response.content)
+            self.assertIn(self.chemistry.title, response.content)
+
     def test_edit_student(self):
         url = reverse(
             'edit-student',

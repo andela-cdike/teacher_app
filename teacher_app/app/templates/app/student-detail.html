@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% load static %}
+
+
+{% block main %}
+
+<main class="col-sm-offset-3 col-sm-6">
+  <section>
+    <h4 class="text-center">{{ student }}'s Subjects</h4>
+    <br />
+    <table class="table table-striped">
+      <thead>
+        <tr>
+          <th>S/N</th>
+          <th>Subjects</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for subject in subjects %}
+          <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ subject.title }}</td>
+            <td>
+              <a href="#">Edit</a>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </section>
+</main>
+
+{% endblock main %}

@@ -6,7 +6,7 @@ from django.views.generic.edit import CreateView, UpdateView
 
 from authentication.models import Teacher
 from forms import ClassForm, StudentForm
-from models import Class, Student
+from models import Class, Student, Subject
 
 
 class IndexView(LoginRequiredMixin, ListView):
@@ -138,3 +138,21 @@ class StudentUpdateView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return reverse('class-detail', kwargs={'pk': self.kwargs['class_id']})
+
+
+class StudentDetailView(LoginRequiredMixin, ListView):
+    model = Subject
+    template_name = 'app/student-detail.html'
+    context_object_name = 'subjects'
+
+    def get_queryset(self):
+        '''Return only subjects student is taking'''
+        queryset = super(StudentDetailView, self).get_queryset()
+        queryset = queryset.filter(students=self.kwargs['pk'])
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(StudentDetailView, self).get_context_data(**kwargs)
+        student = Student.objects.get(pk=self.kwargs['pk'])
+        context['student'] = student
+        return context

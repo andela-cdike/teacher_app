@@ -41,3 +41,11 @@ class Student(Base):
             self.middle_name,
             self.last_name
         )
+
+
+class Subject(Base):
+    title = models.CharField(max_length=50, unique=True)
+    students = models.ManyToManyField(Student)
+
+    def __unicode__(self):
+        return self.title

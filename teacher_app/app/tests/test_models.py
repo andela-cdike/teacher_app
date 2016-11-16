@@ -22,3 +22,10 @@ class StudentModelTestSuite(TestCase):
                 student.last_name
             )
         )
+
+
+class SubjectModelTestSuite(TestCase):
+
+    def test_subject_model(self):
+        subject = factories.SubjectFactory()
+        self.assertEqual(str(subject), subject.title)

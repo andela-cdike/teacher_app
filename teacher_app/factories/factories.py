@@ -1,6 +1,6 @@
 import factory
 
-from app.models import Class, Student
+from app.models import Class, Student, Subject
 from authentication.models import Teacher
 
 
@@ -39,3 +39,20 @@ class StudentFactory(factory.django.DjangoModelFactory):
     middle_name = 'Junior'
     last_name = factory.Sequence(lambda n: 'Doe_{0}'.format(n))
     my_class = factory.SubFactory(ClassFactory)
+
+
+class SubjectFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Subject
+
+    title = factory.Sequence(lambda n: 'Subject_{0}'.format(n))
+
+    @factory.post_generation
+    def students(self, create, extracted, **kwargs):
+        if not create:
+            # simple build, do nothing
+            return
+        if extracted:
+            # A list of groups were passed in, use them
+            for student in extracted:
+                self.students.add(student)
