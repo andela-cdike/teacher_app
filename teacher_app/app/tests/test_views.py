@@ -99,11 +99,10 @@ class StudentViewTestSuite(Base):
         super(StudentViewTestSuite, self).setUp()
         class_a = factories.ClassFactory(teacher=self.teacher)
         self.student = factories.StudentFactory(my_class=class_a)
+        self.physics = factories.SubjectFactory(students=(self.student,))
+        self.chemistry = factories.SubjectFactory(students=(self.student,))
 
     def test_view_students_subjects(self):
-            self.physics = factories.SubjectFactory(students=(self.student,))
-            self.chemistry = factories.SubjectFactory(students=(self.student,))
-
             url = reverse(
                 'student-detail',
                 kwargs={
@@ -135,3 +134,26 @@ class StudentViewTestSuite(Base):
         self.assertEqual(edited_student.first_name, data['first_name'])
         self.assertEqual(edited_student.last_name, data['last_name'])
         self.assertEqual(edited_student.middle_name, data['middle_name'])
+
+    def test_assign_subject_to_student(self):
+        url = reverse(
+            'edit-student',
+            kwargs={
+                'class_id': self.student.my_class.id,
+                'pk': self.student.id,
+            }
+        )
+        data = {
+            'first_name': 'John',
+            'middle_name': 'Junior',
+            'last_name': 'Doe',
+            'subjects': [self.physics.pk, self.chemistry.pk]
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+
+        student = Student.objects.get(pk=self.student.pk)
+        physics = student.subject_set.filter(title=self.physics.title)
+        self.assertTrue(physics.exists())
+        chemistry = student.subject_set.filter(title=self.chemistry.title)
+        self.assertTrue(chemistry.exists())
