@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.db.models import Q
 from django.urls import reverse, reverse_lazy
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView
@@ -87,10 +88,19 @@ class ClassDetailView(LoginRequiredMixin, ListView):
         else:
             queryset = super(ClassDetailView, self).get_queryset()
             queryset = queryset.filter(my_class=self.kwargs['pk'])
-            q = self.request.GET.get('q', None)
-            if q:
-                import ipdb; ipdb.set_trace()
-                queryset = queryset.subject_set.filter(title__icontains=q)
+            query_string = self.request.GET.get('q', None)
+            age_based_queryset = queryset.filter(pk=-1)
+            if query_string:
+                name_based_queryset = queryset.filter(
+                    Q(first_name__icontains=query_string) |
+                    Q(last_name__icontains=query_string) |
+                    Q(middle_name__icontains=query_string)
+                )
+                if query_string.isdigit():
+                    age_based_queryset = queryset.filter(
+                        age__exact=int(query_string)
+                    )
+                queryset = name_based_queryset | age_based_queryset
         return queryset
 
     def get_context_data(self, **kwargs):

@@ -39,6 +39,7 @@ class StudentFactory(factory.django.DjangoModelFactory):
     middle_name = 'Junior'
     last_name = factory.Sequence(lambda n: 'Doe_{0}'.format(n))
     my_class = factory.SubFactory(ClassFactory)
+    age = factory.Sequence(lambda n: n + 8)
 
 
 class SubjectFactory(factory.django.DjangoModelFactory):

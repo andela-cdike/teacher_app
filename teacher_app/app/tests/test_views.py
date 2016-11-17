@@ -68,7 +68,8 @@ class ClassViewsTestSuite(Base):
         data = {
             'first_name': 'John',
             'middle_name': 'Junior',
-            'last_name': 'Doe'
+            'last_name': 'Doe',
+            'age': 10
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
@@ -127,7 +128,8 @@ class StudentViewTestSuite(Base):
         data = {
             'first_name': 'John',
             'middle_name': 'Junior',
-            'last_name': 'Doe'
+            'last_name': 'Doe',
+            'age': 10
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
@@ -148,6 +150,7 @@ class StudentViewTestSuite(Base):
             'first_name': 'John',
             'middle_name': 'Junior',
             'last_name': 'Doe',
+            'age': 10,
             'subjects': [self.subject_a.pk, self.subject_b.pk]
         }
         response = self.client.post(url, data)

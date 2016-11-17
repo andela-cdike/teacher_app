@@ -10,7 +10,7 @@
   <section id="search-bar">
     <form action="{% url 'class-detail' pk=class.pk %}" method="get" class="form-inline">
       <div class="form-group">
-        <input class="form-control" id="search-box" type="text" name="q" placeholder="Filter students by subjects" />
+        <input class="form-control" id="search-box" type="text" name="q" placeholder="Search by name and age" />
       </div>
       <button type="submit" class="btn btn-default">Search</button>
     </form>
@@ -24,9 +24,10 @@
         <tr>
           <th>S/N</th>
           <th>Full Name</th>
+          <th>Age</th>
           <th>
             <form action="{% url 'class-detail' pk=class.pk %}" method="get">
-              <label for="filter">Filter by subjects {{ selected_filter }}:</label>
+              <label for="filter">Filter by subjects:</label>
               <select class="form-control" id="filter" onchange="this.form.submit()" name="filter">
                 <option {% if selected_filter == 0 %}selected{% endif %} value="0">All</option>
                 {% for subject in subjects %}
@@ -48,6 +49,7 @@
                 {{ student }}
               </a>
             </td>
+            <<td>{{ student.age }}</td>
             <td>
               <a href="{% url 'edit-student' class_id=student.my_class.pk pk=student.pk %}">Edit</a>
             </td>

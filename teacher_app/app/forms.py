@@ -14,7 +14,7 @@ class StudentForm(forms.ModelForm):
 
     class Meta:
         model = Student
-        fields = ('first_name', 'last_name', 'middle_name')
+        fields = ('first_name', 'last_name', 'middle_name', 'age')
 
     subjects = forms.ModelMultipleChoiceField(
         queryset=Subject.objects.all(), required=False

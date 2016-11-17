@@ -34,6 +34,7 @@ class Student(Base):
     my_class = models.ForeignKey(
         'Class', related_name='students'
     )
+    age = models.IntegerField()
 
     def __unicode__(self):
         return '{0} {1} {2}'.format(
