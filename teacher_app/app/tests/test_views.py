@@ -3,7 +3,7 @@ from django.test import Client, TestCase
 from django.urls import reverse
 
 from authentication.models import Teacher
-from app.models import Class, Student
+from app.models import Class, ScoreSheet, Student
 from factories import factories
 
 
@@ -101,8 +101,12 @@ class StudentViewTestSuite(Base):
         super(StudentViewTestSuite, self).setUp()
         self.class_a = factories.ClassFactory(teacher=self.teacher)
         self.student = factories.StudentFactory(my_class=self.class_a)
-        self.subject_a = factories.SubjectFactory(students=(self.student,))
-        self.subject_b = factories.SubjectFactory(students=(self.student,))
+        self.subject_a = factories.SubjectFactory()
+        self.subject_b = factories.SubjectFactory()
+        factories.ScoreSheetFactory(
+            student=self.student, subject=self.subject_a)
+        self.score_sheet = factories.ScoreSheetFactory(
+            student=self.student, subject=self.subject_b)
 
     def test_view_students_subjects(self):
             url = reverse(
@@ -139,6 +143,8 @@ class StudentViewTestSuite(Base):
         self.assertEqual(edited_student.middle_name, data['middle_name'])
 
     def test_assign_subject_to_student(self):
+        subject_c = factories.SubjectFactory()
+        subject_d = factories.SubjectFactory()
         url = reverse(
             'edit-student',
             kwargs={
@@ -151,16 +157,29 @@ class StudentViewTestSuite(Base):
             'middle_name': 'Junior',
             'last_name': 'Doe',
             'age': 10,
-            'subjects': [self.subject_a.pk, self.subject_b.pk]
+            'subjects': [subject_c.pk, subject_d.pk]
         }
         response = self.client.post(url, data)
         self.assertEqual(response.status_code, 302)
 
-        student = Student.objects.get(pk=self.student.pk)
-        subject_a = student.subject_set.filter(title=self.subject_a.title)
-        self.assertTrue(subject_a.exists())
-        subject_b = student.subject_set.filter(title=self.subject_b.title)
-        self.assertTrue(subject_b.exists())
+        subject_c = ScoreSheet.objects.filter(subject__title=subject_c.title)
+        self.assertTrue(subject_c.exists())
+        subject_d = ScoreSheet.objects.filter(subject__title=subject_d.title)
+        self.assertTrue(subject_d.exists())
+
+    def test_set_student_score(self):
+        url = reverse('assign-score', kwargs={'pk': self.score_sheet.pk})
+        data = {
+            'student': self.student.pk,
+            'subject': self.subject_b.pk,
+            'score': 98
+        }
+        response = self.client.post(url, data)
+        self.assertEqual(response.status_code, 302)
+
+        record = ScoreSheet.objects.filter(
+            student=self.student.pk).filter(subject=self.subject_b.pk)[0]
+        self.assertEqual(record.score, data['score'])
 
     def test_filter_by_subject(self):
         student_b = factories.StudentFactory(my_class=self.class_a)

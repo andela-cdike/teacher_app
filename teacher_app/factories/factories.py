@@ -1,6 +1,6 @@
 import factory
 
-from app.models import Class, Student, Subject
+from app.models import Class, ScoreSheet, Student, Subject
 from authentication.models import Teacher
 
 
@@ -48,12 +48,11 @@ class SubjectFactory(factory.django.DjangoModelFactory):
 
     title = factory.Sequence(lambda n: 'Subject_{0}'.format(n))
 
-    @factory.post_generation
-    def students(self, create, extracted, **kwargs):
-        if not create:
-            # simple build, do nothing
-            return
-        if extracted:
-            # A list of groups were passed in, use them
-            for student in extracted:
-                self.students.add(student)
+
+class ScoreSheetFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = ScoreSheet
+
+    student = factory.SubFactory(StudentFactory)
+    subject = factory.SubFactory(SubjectFactory)
+    score = factory.sequence(lambda n: n + 50)

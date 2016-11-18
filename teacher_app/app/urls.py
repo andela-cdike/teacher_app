@@ -24,4 +24,10 @@ urlpatterns = [
     url(r'^class/(?P<class_id>[0-9]+)/student/(?P<pk>[0-9]+)$',
         views.StudentDetailView.as_view(),
         name='student-detail'),
+
+    # Assign scores to students
+    url(r'^assign-score/(?P<pk>[0-9]+)$',
+        views.AssignScoreView.as_view(),
+        name='assign-score'),
+
 ]

@@ -13,20 +13,25 @@
         <tr>
           <th>S/N</th>
           <th>Subjects</th>
+          <th>Scores</th>
         </tr>
       </thead>
       <tbody>
-        {% for subject in subjects %}
+        {% for score in score_sheet %}
           <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{ subject.title }}</td>
+            <td>{{ score.subject.title }}</td>
+            <td>{{ score.score|default:"--" }}</td>
             <td>
-              <a href="#">Edit</a>
+              <a href="{% url 'assign-score' pk=score.pk %}">
+                Assign Score
+              </a>
             </td>
           </tr>
         {% endfor %}
       </tbody>
     </table>
+    </div>
   </section>
 </main>
 

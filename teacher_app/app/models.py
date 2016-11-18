@@ -46,7 +46,22 @@ class Student(Base):
 
 class Subject(Base):
     title = models.CharField(max_length=50, unique=True)
-    students = models.ManyToManyField(Student)
 
     def __unicode__(self):
         return self.title
+
+
+class ScoreSheet(Base):
+    student = models.ForeignKey('Student', related_name='score')
+    subject = models.ForeignKey('Subject')
+    score = models.IntegerField(null=True)
+
+    class Meta:
+        unique_together = ('subject', 'student')
+
+    def __unicode__(self):
+        return '{0} scored {1} in {2}'.format(
+            str(self.student),
+            self.score,
+            self.subject.title
+        )

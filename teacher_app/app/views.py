@@ -6,8 +6,8 @@ from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView
 
 from authentication.models import Teacher
-from forms import ClassForm, StudentForm
-from models import Class, Student, Subject
+from forms import ClassForm, ScoreSheetForm, StudentForm
+from models import Class, ScoreSheet, Student, Subject
 
 
 class IndexView(LoginRequiredMixin, ListView):
@@ -84,7 +84,7 @@ class ClassDetailView(LoginRequiredMixin, ListView):
         # if filtering based on students offering particular subject
         if filter_id:
             subject = Subject.objects.get(pk=filter_id)
-            queryset = subject.students.all()
+            queryset = Student.objects.filter(score__subject=subject)
         else:
             queryset = super(ClassDetailView, self).get_queryset()
             queryset = queryset.filter(my_class=self.kwargs['pk'])
@@ -121,12 +121,17 @@ class StudentCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         '''
-        Add relationship between this student and the class
-        whose id is in the url
+        Add relationship between this student, subject and scores
         '''
         self.object = form.save(commit=False)
         students_class = Class.objects.get(pk=self.kwargs['pk'])
         self.object.my_class = students_class
+        self.object.save()
+
+        # Add entry in score sheet table
+        for subject in form.cleaned_data['subjects']:
+            ScoreSheet.objects.create(
+                student=self.object, subject=subject)
         return super(StudentCreateView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -153,6 +158,17 @@ class StudentUpdateView(LoginRequiredMixin, UpdateView):
                 messages.add_message(self.request, messages.ERROR, error)
         return super(StudentUpdateView, self).form_invalid(form)
 
+    def form_valid(self, form):
+        '''Update relationship between student, subject and scores'''
+        self.object = form.save(commit=False)
+        self.object.save()
+
+        # Add entry in score sheet table
+        for subject in form.cleaned_data['subjects']:
+            ScoreSheet.objects.create(
+                student=self.object, subject=subject)
+        return super(StudentUpdateView, self).form_valid(form)
+
     def get_context_data(self, **kwargs):
         context = super(
             StudentUpdateView, self).get_context_data(**kwargs)
@@ -165,14 +181,14 @@ class StudentUpdateView(LoginRequiredMixin, UpdateView):
 
 
 class StudentDetailView(LoginRequiredMixin, ListView):
-    model = Subject
+    model = ScoreSheet
     template_name = 'app/student-detail.html'
-    context_object_name = 'subjects'
+    context_object_name = 'score_sheet'
 
     def get_queryset(self):
         '''Return only subjects student is taking'''
         queryset = super(StudentDetailView, self).get_queryset()
-        queryset = queryset.filter(students=self.kwargs['pk'])
+        queryset = queryset.filter(student=self.kwargs['pk'])
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -180,3 +196,33 @@ class StudentDetailView(LoginRequiredMixin, ListView):
         student = Student.objects.get(pk=self.kwargs['pk'])
         context['student'] = student
         return context
+
+
+class AssignScoreView(LoginRequiredMixin, UpdateView):
+    model = ScoreSheet
+    context_object_name = 'scores'
+    template_name = 'app/assign-score.html'
+    form_class = ScoreSheetForm
+
+    def form_invalid(self, form):
+        '''Add error messages to the messages framework'''
+        for key in form.errors:
+            for error in form.errors[key]:
+                messages.add_message(self.request, messages.ERROR, error)
+        return super(AssignScoreView, self).form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            AssignScoreView, self).get_context_data(**kwargs)
+        context['title'] = "assign student's score"
+        context['pk'] = self.kwargs['pk']
+        return context
+
+    def get_success_url(self):
+        return reverse(
+            'student-detail',
+            kwargs={
+                'class_id': self.object.student.my_class.pk,
+                'pk': self.object.student.pk
+            }
+        )
