@@ -19,6 +19,8 @@ class Class(Base):
     teacher = models.ForeignKey(
         'authentication.Teacher', related_name='classes'
     )
+    total = models.IntegerField(null=True)
+    average = models.IntegerField(null=True)
 
     def __unicode__(self):
         return self.name
@@ -35,6 +37,8 @@ class Student(Base):
         'Class', related_name='students'
     )
     age = models.IntegerField()
+    total = models.IntegerField(null=True)
+    average = models.IntegerField(null=True)
 
     def __unicode__(self):
         return '{0} {1} {2}'.format(
@@ -42,6 +46,14 @@ class Student(Base):
             self.middle_name,
             self.last_name
         )
+
+    def save(self, *args, **kwargs):
+        super(Class, self).save(*args, **kwargs)
+        self.my_class.total = Student.objects.aggregate(
+            models.Sum('total'))['total__sum']
+        count = Student.objects.all().count()
+        self.my_class.average = self.my_class.total / count
+        self.my_class.save()
 
 
 class Subject(Base):
@@ -65,3 +77,13 @@ class ScoreSheet(Base):
             self.score,
             self.subject.title
         )
+
+    def save(self, *args, **kwargs):
+        super(ScoreSheet, self).save(*args, **kwargs)
+        self.student.total = ScoreSheet.objects.filter(
+            student=self.student.pk
+        ).aggregate(models.Sum('score'))['score__sum']
+        count = ScoreSheet.objects.filter(
+            student=self.student.pk).count()
+        self.student.average = self.student.total / count
+        self.student.save()
