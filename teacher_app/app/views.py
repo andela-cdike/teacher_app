@@ -17,9 +17,18 @@ class IndexView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         '''Return only classes owned by current user'''
+        currently_ranked_by = self.request.GET.get('ranked_by', 'name')
         queryset = super(IndexView, self).get_queryset()
-        queryset = queryset.filter(teacher=self.request.user)
+        queryset = queryset.filter(teacher=self.request.user).order_by(
+            currently_ranked_by)
         return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super(
+            IndexView, self).get_context_data(**kwargs)
+        context['currently_ranked_by'] = self.request.GET.get('ranked_by',
+                                                              'name')
+        return context
 
 
 class ClassCreateView(LoginRequiredMixin, CreateView):
@@ -89,6 +98,7 @@ class ClassDetailView(LoginRequiredMixin, ListView):
             queryset = super(ClassDetailView, self).get_queryset()
             queryset = queryset.filter(my_class=self.kwargs['pk'])
             query_string = self.request.GET.get('q', None)
+            # deal with non-age based queries
             age_based_queryset = queryset.filter(pk=-1)
             if query_string:
                 name_based_queryset = queryset.filter(

@@ -15,6 +15,16 @@
           <th>Class Name</th>
           <th>Total</th>
           <th>Average</th>
+          <th>
+            <form action="{% url 'index' %}" method="get">
+              <label for="rank">Rank by:</label>
+              <select class="form-control" id="filter" onchange="this.form.submit()" name="ranked_by">
+                <option {% if select_ranked_vy %}selected{% endif %} value="name">All</option>
+                <option {% if currently_ranked_by == 'average' %}selected{% endif %} value="average">Rank by Average</option>
+                <option {% if currently_ranked_by == 'total' %}selected{% endif %} value="total">Rank by Total</option>
+              </select>
+            </form>
+          </th>
         </tr>
       </thead>
       <tbody>
