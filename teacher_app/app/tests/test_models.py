@@ -61,3 +61,36 @@ class ScoreSheetModelTestSuite(TestCase):
         expected_average = (
             self.score_sheet_a.score + self.score_sheet_b.score) / 2
         self.assertEqual(self.edited_student.average, expected_average)
+
+    def test_class_total_is_calculated_accurately(self):
+        student_b = factories.StudentFactory(
+            my_class=self.score_sheet_a.student.my_class)
+        subject_c = factories.SubjectFactory()
+        score_sheet_c = factories.ScoreSheetFactory(
+            student=student_b, subject=subject_c, score=50
+        )
+        expected_total = (
+            self.score_sheet_a.score +
+            self.score_sheet_b.score +
+            score_sheet_c.score
+        )
+        self.assertEqual(
+            self.edited_student.my_class.total,
+            expected_total
+        )
+
+    def test_class_average_is_calculated_accurately(self):
+        student_b = factories.StudentFactory(
+            my_class=self.score_sheet_a.student.my_class)
+        subject_c = factories.SubjectFactory()
+        score_sheet_c = factories.ScoreSheetFactory(
+            student=student_b, subject=subject_c, score=50
+        )
+        expected_total = (
+            self.score_sheet_a.score +`
+            self.score_sheet_b.score +
+            score_sheet_c.score
+        )
+        expected_average = expected_total / float(3)
+        self.assertEqual(
+            self.edited_student.my_class.average, expected_average)

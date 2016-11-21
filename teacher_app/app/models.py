@@ -20,7 +20,7 @@ class Class(Base):
         'authentication.Teacher', related_name='classes'
     )
     total = models.IntegerField(null=True)
-    average = models.IntegerField(null=True)
+    average = models.FloatField(null=True)
 
     def __unicode__(self):
         return self.name
@@ -38,7 +38,7 @@ class Student(Base):
     )
     age = models.IntegerField()
     total = models.IntegerField(null=True)
-    average = models.IntegerField(null=True)
+    average = models.FloatField(null=True)
 
     def __unicode__(self):
         return '{0} {1} {2}'.format(
@@ -48,12 +48,16 @@ class Student(Base):
         )
 
     def save(self, *args, **kwargs):
-        super(Class, self).save(*args, **kwargs)
-        self.my_class.total = Student.objects.aggregate(
+        super(Student, self).save(*args, **kwargs)
+        class_total = Student.objects.filter(
+            my_class=self.my_class.pk).aggregate(
             models.Sum('total'))['total__sum']
-        count = Student.objects.all().count()
-        self.my_class.average = self.my_class.total / count
-        self.my_class.save()
+        if class_total:
+            self.my_class.total = class_total
+            count = ScoreSheet.objects.filter(
+                student__my_class=self.my_class.pk).count()
+            self.my_class.average = self.my_class.total / float(count)
+            self.my_class.save()
 
 
 class Subject(Base):
@@ -80,10 +84,12 @@ class ScoreSheet(Base):
 
     def save(self, *args, **kwargs):
         super(ScoreSheet, self).save(*args, **kwargs)
-        self.student.total = ScoreSheet.objects.filter(
+        score_sum = ScoreSheet.objects.filter(
             student=self.student.pk
         ).aggregate(models.Sum('score'))['score__sum']
-        count = ScoreSheet.objects.filter(
-            student=self.student.pk).count()
-        self.student.average = self.student.total / count
-        self.student.save()
+        if score_sum:
+            self.student.total = score_sum
+            count = ScoreSheet.objects.filter(
+                student=self.student.pk).count()
+            self.student.average = score_sum / float(count)
+            self.student.save()
